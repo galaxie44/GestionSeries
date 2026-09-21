@@ -1,0 +1,74 @@
+/* Forms --------------------------------------------------------------------------------------- */
+table {
+	width: 100%;
+}
+
+form  {
+    display: inline;
+    min-width: 85px;
+}
+
+button {
+	min-width: 75px;
+	max-width: 75px;
+	min-height : 35px;
+	max-height: 35px;
+}
+
+form label {
+    float: left;
+    width: 200px;
+    margin: 3px 0px 0px 0px;
+}
+
+form input {
+    margin: 3px 3px 0px 0px;
+    border: 1px #999 solid;
+}
+
+form input.sansLabel {
+    margin-left: 200px;
+}
+
+/* Styles et couleurs -------------------------------------------------------------------------- */
+
+td.filler {
+	width : 30px;
+	max-width: 30px;
+	min-width: 30px;
+}
+
+td.true {
+  background-color: #F0FFF0;
+}
+
+td.false {
+  background-color: #FFF0F0;
+}
+
+
+td.Serie {
+	font-size: 3em;
+}
+
+td.Saison {
+	font-size: 2em;
+}
+
+td.Episode {
+	font-size: 16px;
+}
+
+.erreur {
+	color: #FF0000;
+}
+.SerieContent {
+	margin : 5px;
+	font-size: 3em;
+}
+
+.SaisonContent {
+	margin : 5px;
+	padding : 5px;
+	font-size: 0.75em;
+}

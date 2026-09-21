@@ -1,0 +1,20 @@
+﻿# Eclipse
+.classpath
+.project
+.settings/
+bin/
+build/
+.metadata/
+Servers/
+
+# Maven / Java
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+*.log
