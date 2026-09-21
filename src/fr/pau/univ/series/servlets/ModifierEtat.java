@@ -13,24 +13,23 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(urlPatterns = "/etat")
 public class ModifierEtat extends HttpServlet {
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
 			throws ServletException, IOException {
-		final int episodeId = Integer.parseInt(request.getParameter("episode"));
 		try {
+			final int episodeId = Integer.parseInt(request.getParameter("episode"));
 			final Episode e = DaoFactory.getInstance().getEpisodeDao().readEpisode(episodeId);
 			if (e != null) {
 				e.setVu(!e.isVu());
-				DaoFactory.getInstance().getEpisodeDao().updateEpisode(e);
+				DaoFactory.getInstance().getEpisodeDao().updateEpisode(e, true);
 			}
-		} catch (final DaoException e) {
+		} catch (final DaoException | NumberFormatException e) {
 			request.setAttribute("erreur", e.getMessage());
 			e.printStackTrace();
 		}
-		final String redir = "http://".concat(request.getServerName()).concat(":")
-				.concat(Integer.toString(request.getServerPort())).concat(request.getContextPath()).concat("/liste");
-		response.sendRedirect(redir);
+		response.sendRedirect("http://".concat(request.getServerName()).concat(":")
+				.concat(Integer.toString(request.getServerPort())).concat(request.getContextPath()).concat("/liste"));
 	}
-
 }

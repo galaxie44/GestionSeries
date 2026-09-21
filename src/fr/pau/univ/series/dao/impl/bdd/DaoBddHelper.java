@@ -4,11 +4,10 @@ import fr.pau.univ.series.dao.SeriesContextListener;
 import fr.pau.univ.series.exception.DaoException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.PersistenceException;
 
 /**
- * Singleton d'accès à l'EntityManager JPA (PDF p.41–42, 60).
- * La DaoFactory ne touche pas directement à la BDD : elle délègue aux DAO,
- * qui utilisent ce helper.
+ * Singleton d'accès à l'EntityManager JPA (PDF p.41–42, 60, 68).
  */
 public class DaoBddHelper {
 
@@ -21,18 +20,16 @@ public class DaoBddHelper {
 			if (this.em != null) {
 				System.out.println("EntityManager créé.");
 			} else {
-				System.out.println(
-						"[DaoBddHelper] EntityManager indisponible pour l'instant (JPA/MySQL). Mode mémoire actif.");
+				throw new DaoException(
+						"EntityManager null : vérifier MySQL (WAMP), persistence.xml et les jars WEB-INF/lib.");
 			}
+		} catch (final DaoException e) {
+			throw e;
 		} catch (final Exception e) {
 			throw new DaoException("Impossible de créer l'EntityManager.", e);
 		}
 	}
 
-	/**
-	 * @return l'unique instance de {@link DaoBddHelper}
-	 * @throws DaoException si l'initialisation échoue
-	 */
 	public static synchronized DaoBddHelper getInstance() throws DaoException {
 		if (instance == null) {
 			instance = new DaoBddHelper();
@@ -40,48 +37,65 @@ public class DaoBddHelper {
 		return instance;
 	}
 
-	/**
-	 * @return l'EntityManager JPA
-	 * @throws DaoException si JPA n'est pas initialisé
-	 */
-	public EntityManager getEm() throws DaoException {
-		if (this.em == null) {
-			throw new DaoException(
-					"EntityManager null : vérifier MySQL (WAMP), persistence.xml et les dépendances Maven.");
-		}
+	public EntityManager getEm() {
 		return this.em;
 	}
 
-	/** @return {@code true} si JPA est opérationnel */
-	public boolean isJpaReady() {
-		return this.em != null;
-	}
-
-	public void beginTransaction() throws DaoException {
-		final EntityTransaction trans = getEm().getTransaction();
+	public void beginTransaction() {
+		final EntityTransaction trans = this.em.getTransaction();
 		if (!trans.isActive()) {
 			trans.begin();
 		}
 	}
 
-	public void commitTransaction() throws DaoException {
-		final EntityTransaction trans = getEm().getTransaction();
+	public void commitTransaction() {
+		final EntityTransaction trans = this.em.getTransaction();
 		if (trans.isActive()) {
 			trans.commit();
 		}
 	}
 
 	public void rollbackTransaction() {
+		final EntityTransaction trans = this.em.getTransaction();
+		if (trans.isActive()) {
+			trans.rollback();
+		}
+	}
+
+	/**
+	 * Factorise persist / merge / remove avec gestion optionnelle de transaction.
+	 */
+	public void makePersistencyAction(final Object obj, final boolean useTrans, final PersistencyAction action)
+			throws PersistenceException {
 		try {
-			if (this.em == null) {
-				return;
+			if (useTrans) {
+				beginTransaction();
 			}
-			final EntityTransaction trans = this.em.getTransaction();
-			if (trans.isActive()) {
-				trans.rollback();
+			switch (action) {
+			case PERSIST:
+				this.em.persist(obj);
+				break;
+			case MERGE:
+				this.em.merge(obj);
+				break;
+			case REMOVE:
+				Object managed = obj;
+				if (!this.em.contains(obj)) {
+					managed = this.em.merge(obj);
+				}
+				this.em.remove(managed);
+				break;
+			default:
+				break;
 			}
-		} catch (final Exception e) {
-			e.printStackTrace();
+			if (useTrans) {
+				commitTransaction();
+			}
+		} catch (final PersistenceException e) {
+			if (useTrans) {
+				rollbackTransaction();
+			}
+			throw e;
 		}
 	}
 }

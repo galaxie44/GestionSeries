@@ -1,59 +1,71 @@
 package fr.pau.univ.series.dao.impl.bdd;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import fr.pau.univ.series.dao.interfaces.ISerieDao;
 import fr.pau.univ.series.exception.DaoException;
 import fr.pau.univ.series.model.Serie;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.TypedQuery;
 
-/**
- * Implémentation BDD de {@link ISerieDao}.
- * Pour l'instant : lecture/écriture via {@link MemoireStore} ;
- * {@link DaoBddHelper} est déjà branché pour les futures opérations JPA.
- */
 public class SerieDaoBdd implements ISerieDao {
 
 	private final DaoBddHelper bdd;
-	private final MemoireStore store = MemoireStore.getInstance();
 
 	public SerieDaoBdd() throws DaoException {
 		this.bdd = DaoBddHelper.getInstance();
 	}
 
 	@Override
-	public Serie createSerie(final Serie s) throws DaoException {
-		this.store.getSeries().add(s);
-		return s;
+	public Serie createSerie(final Serie s, final boolean useTransaction) throws DaoException {
+		try {
+			this.bdd.makePersistencyAction(s, useTransaction, PersistencyAction.PERSIST);
+			return s;
+		} catch (final PersistenceException e) {
+			throw new DaoException("Impossible de créer la série", e);
+		}
 	}
 
 	@Override
 	public Serie readSerie(final int serieId) throws DaoException {
-		for (final Serie serie : this.store.getSeries()) {
-			if (serie.getId() == serieId) {
-				return serie;
+		try {
+			final TypedQuery<Serie> query = this.bdd.getEm().createNamedQuery("Serie.findById", Serie.class);
+			query.setParameter("id", serieId);
+			final List<Serie> ret = query.getResultList();
+			if (!ret.isEmpty()) {
+				return ret.get(0);
 			}
+			return null;
+		} catch (final PersistenceException e) {
+			throw new DaoException("Impossible de lire la série " + serieId, e);
 		}
-		return null;
 	}
 
 	@Override
 	public List<Serie> readAllSeries() throws DaoException {
-		return new ArrayList<>(this.store.getSeries());
+		try {
+			final TypedQuery<Serie> query = this.bdd.getEm().createNamedQuery("Serie.findAll", Serie.class);
+			return query.getResultList();
+		} catch (final PersistenceException e) {
+			throw new DaoException("Impossible de lister les séries", e);
+		}
 	}
 
 	@Override
-	public void updateSerie(final Serie s) throws DaoException {
-		// Objet déjà en mémoire ; JPA merge viendra plus tard
+	public void updateSerie(final Serie s, final boolean useTransaction) throws DaoException {
+		try {
+			this.bdd.makePersistencyAction(s, useTransaction, PersistencyAction.MERGE);
+		} catch (final PersistenceException e) {
+			throw new DaoException("Impossible de modifier la série", e);
+		}
 	}
 
 	@Override
-	public void deleteSerie(final Serie s) throws DaoException {
-		this.store.getSeries().remove(s);
-	}
-
-	/** Accès au helper JPA (transactions, EntityManager). */
-	protected DaoBddHelper getBdd() {
-		return this.bdd;
+	public void deleteSerie(final Serie s, final boolean useTransaction) throws DaoException {
+		try {
+			this.bdd.makePersistencyAction(s, useTransaction, PersistencyAction.REMOVE);
+		} catch (final PersistenceException e) {
+			throw new DaoException("Impossible de supprimer la série", e);
+		}
 	}
 }

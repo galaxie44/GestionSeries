@@ -3,7 +3,6 @@ package fr.pau.univ.series.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.pau.univ.series.dao.DaoFactory;
 import fr.pau.univ.series.exception.SeriesException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -13,16 +12,18 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
-/**
- * Entité JPA représentant une série TV.
- * Les annotations indiquent à JPA comment mapper l'objet vers la table BDD.
- */
 @Entity
 @Table(name = "Serie")
+@NamedQueries({
+		@NamedQuery(name = "Serie.findAll", query = "SELECT s FROM Serie s"),
+		@NamedQuery(name = "Serie.findById", query = "SELECT s FROM Serie s WHERE s.id = :id")
+})
 public class Serie {
 
 	private int id;
@@ -30,16 +31,11 @@ public class Serie {
 	private boolean toutVu = false;
 	private List<Saison> saisons = new ArrayList<>();
 
-	/** Constructeur sans paramètre obligatoire pour JPA. */
 	public Serie() {
 	}
 
-	/**
-	 * @param nom Nom de la série.
-	 */
 	public Serie(final String nom) {
 		this.nom = nom;
-		setId(++DaoFactory.lastSerieId);
 	}
 
 	@Id
@@ -62,11 +58,6 @@ public class Serie {
 		this.nom = nom;
 	}
 
-	/**
-	 * Relation 1-N : une série possède plusieurs saisons.
-	 * cascade=ALL : créer/modifier/supprimer une série propage aux saisons.
-	 * orphanRemoval : une saison retirée de la liste est effacée en BDD.
-	 */
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "fk_serie", referencedColumnName = "id")
 	public List<Saison> getSaisons() {
@@ -92,9 +83,6 @@ public class Serie {
 		this.toutVu = toutVu;
 	}
 
-	/**
-	 * Calculé à la volée : non stocké en BDD.
-	 */
 	@Transient
 	public boolean isToutVu() {
 		this.toutVu = true;

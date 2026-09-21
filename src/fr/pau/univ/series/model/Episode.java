@@ -1,18 +1,22 @@
 package fr.pau.univ.series.model;
 
-import fr.pau.univ.series.dao.DaoFactory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 
-/**
- * Entité JPA représentant un épisode.
- */
 @Entity
 @Table(name = "Episode")
+@NamedQueries({
+		@NamedQuery(name = "Episode.findById", query = "SELECT e FROM Episode e WHERE e.id = :id"),
+		@NamedQuery(name = "Episode.findAll", query = "SELECT e FROM Episode e"),
+		@NamedQuery(name = "Episode.findBySaison",
+				query = "SELECT e FROM Saison s JOIN s.episodes e WHERE s.id = :id")
+})
 public class Episode {
 
 	private int id;
@@ -20,18 +24,18 @@ public class Episode {
 	private int numero;
 	private boolean vu = false;
 
-	/** Constructeur sans paramètre obligatoire pour JPA. */
 	public Episode() {
 	}
 
-	/**
-	 * @param titre  titre de l'épisode
-	 * @param numero numéro de l'épisode
-	 */
 	public Episode(final String titre, final int numero) {
 		this.titre = titre;
 		this.numero = numero;
-		setId(++DaoFactory.lastEpisodeId);
+	}
+
+	/** Constructeur pratique quand le numéro n'est pas encore connu. */
+	public Episode(final String titre) {
+		this.titre = titre;
+		this.numero = 1;
 	}
 
 	@Id

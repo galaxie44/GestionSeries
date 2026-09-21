@@ -1,90 +1,81 @@
 package fr.pau.univ.series.dao.impl.bdd;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import fr.pau.univ.series.dao.interfaces.IEpisodeDao;
 import fr.pau.univ.series.exception.DaoException;
-import fr.pau.univ.series.exception.SeriesException;
 import fr.pau.univ.series.model.Episode;
-import fr.pau.univ.series.model.Saison;
-import fr.pau.univ.series.model.Serie;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.TypedQuery;
 
-/**
- * Implémentation BDD de {@link IEpisodeDao} (mémoire + helper JPA prêt).
- */
 public class EpisodeDaoBdd implements IEpisodeDao {
 
 	private final DaoBddHelper bdd;
-	private final MemoireStore store = MemoireStore.getInstance();
 
 	public EpisodeDaoBdd() throws DaoException {
 		this.bdd = DaoBddHelper.getInstance();
 	}
 
 	@Override
-	public Episode createEpisode(final Episode e) throws DaoException {
-		return e;
+	public Episode createEpisode(final Episode e, final boolean useTransaction) throws DaoException {
+		try {
+			this.bdd.makePersistencyAction(e, useTransaction, PersistencyAction.PERSIST);
+			return e;
+		} catch (final PersistenceException e1) {
+			throw new DaoException("Impossible de créer l'épisode", e1);
+		}
 	}
 
 	@Override
 	public Episode readEpisode(final int episodeId) throws DaoException {
-		for (final Serie serie : this.store.getSeries()) {
-			for (final Saison saison : serie.getSaisons()) {
-				for (final Episode episode : saison.getEpisodes()) {
-					if (episode.getId() == episodeId) {
-						return episode;
-					}
-				}
+		try {
+			final TypedQuery<Episode> query = this.bdd.getEm().createNamedQuery("Episode.findById", Episode.class);
+			query.setParameter("id", episodeId);
+			final List<Episode> ret = query.getResultList();
+			if (!ret.isEmpty()) {
+				return ret.get(0);
 			}
+			return null;
+		} catch (final PersistenceException e) {
+			throw new DaoException("Impossible de lire l'épisode " + episodeId, e);
 		}
-		return null;
 	}
 
 	@Override
 	public List<Episode> readAllEpisodes() throws DaoException {
-		final List<Episode> all = new ArrayList<>();
-		for (final Serie serie : this.store.getSeries()) {
-			for (final Saison saison : serie.getSaisons()) {
-				all.addAll(saison.getEpisodes());
-			}
+		try {
+			return this.bdd.getEm().createNamedQuery("Episode.findAll", Episode.class).getResultList();
+		} catch (final PersistenceException e) {
+			throw new DaoException("Impossible de lister les épisodes", e);
 		}
-		return all;
 	}
 
 	@Override
 	public List<Episode> readEpisodesBySaison(final int saisonId) throws DaoException {
-		for (final Serie serie : this.store.getSeries()) {
-			for (final Saison saison : serie.getSaisons()) {
-				if (saison.getId() == saisonId) {
-					return new ArrayList<>(saison.getEpisodes());
-				}
-			}
-		}
-		return Collections.emptyList();
-	}
-
-	@Override
-	public void updateEpisode(final Episode e) throws DaoException {
-		// Objet déjà en mémoire (bascule vu / non vu)
-	}
-
-	@Override
-	public void deleteEpisode(final Episode e) throws DaoException {
-		for (final Serie serie : this.store.getSeries()) {
-			for (final Saison saison : serie.getSaisons()) {
-				try {
-					saison.removeEpisode(e);
-					return;
-				} catch (final SeriesException ignored) {
-					// épisode absent de cette saison
-				}
-			}
+		try {
+			final TypedQuery<Episode> query = this.bdd.getEm().createNamedQuery("Episode.findBySaison", Episode.class);
+			query.setParameter("id", saisonId);
+			return query.getResultList();
+		} catch (final PersistenceException e) {
+			throw new DaoException("Impossible de lire les épisodes de la saison " + saisonId, e);
 		}
 	}
 
-	protected DaoBddHelper getBdd() {
-		return this.bdd;
+	@Override
+	public void updateEpisode(final Episode e, final boolean useTransaction) throws DaoException {
+		try {
+			this.bdd.makePersistencyAction(e, useTransaction, PersistencyAction.MERGE);
+		} catch (final PersistenceException ex) {
+			throw new DaoException("Impossible de modifier l'épisode", ex);
+		}
+	}
+
+	@Override
+	public void deleteEpisode(final Episode e, final boolean useTransaction) throws DaoException {
+		try {
+			this.bdd.makePersistencyAction(e, useTransaction, PersistencyAction.REMOVE);
+		} catch (final PersistenceException ex) {
+			throw new DaoException("Impossible de supprimer l'épisode", ex);
+		}
 	}
 }

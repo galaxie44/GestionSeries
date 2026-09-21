@@ -3,7 +3,6 @@ package fr.pau.univ.series.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.pau.univ.series.dao.DaoFactory;
 import fr.pau.univ.series.exception.SeriesException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -13,15 +12,22 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
-/**
- * Entité JPA représentant une saison.
- */
 @Entity
 @Table(name = "Saison")
+@NamedQueries({
+		@NamedQuery(name = "Saison.findById", query = "SELECT s FROM Saison s WHERE s.id = :id"),
+		@NamedQuery(name = "Saison.findAll", query = "SELECT s FROM Saison s"),
+		@NamedQuery(name = "Saison.findByEpisode",
+				query = "SELECT s FROM Saison s JOIN s.episodes e WHERE e.id = :id"),
+		@NamedQuery(name = "Saison.findBySerie",
+				query = "SELECT sais FROM Serie ser JOIN ser.saisons sais WHERE ser.id = :id")
+})
 public class Saison {
 
 	private int id;
@@ -30,18 +36,12 @@ public class Saison {
 	private boolean toutVu = false;
 	private List<Episode> episodes = new ArrayList<>();
 
-	/** Constructeur sans paramètre obligatoire pour JPA. */
 	public Saison() {
 	}
 
-	/**
-	 * @param nom    Nom de la saison.
-	 * @param numero Numéro de la saison.
-	 */
 	public Saison(final String nom, final int numero) {
 		this.nom = nom;
 		this.numero = numero;
-		setId(++DaoFactory.lastSaisonId);
 	}
 
 	@Id
@@ -73,9 +73,6 @@ public class Saison {
 		this.nom = nom;
 	}
 
-	/**
-	 * Relation 1-N : une saison possède plusieurs épisodes.
-	 */
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "fk_saison", referencedColumnName = "id")
 	public List<Episode> getEpisodes() {

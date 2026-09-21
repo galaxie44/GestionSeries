@@ -1,81 +1,81 @@
 package fr.pau.univ.series.dao.impl.bdd;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import fr.pau.univ.series.dao.interfaces.ISaisonDao;
 import fr.pau.univ.series.exception.DaoException;
-import fr.pau.univ.series.exception.SeriesException;
 import fr.pau.univ.series.model.Saison;
-import fr.pau.univ.series.model.Serie;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.TypedQuery;
 
-/**
- * Implémentation BDD de {@link ISaisonDao} (mémoire + helper JPA prêt).
- */
 public class SaisonDaoBdd implements ISaisonDao {
 
 	private final DaoBddHelper bdd;
-	private final MemoireStore store = MemoireStore.getInstance();
 
 	public SaisonDaoBdd() throws DaoException {
 		this.bdd = DaoBddHelper.getInstance();
 	}
 
 	@Override
-	public Saison createSaison(final Saison s) throws DaoException {
-		return s;
+	public Saison createSaison(final Saison s, final boolean useTransaction) throws DaoException {
+		try {
+			this.bdd.makePersistencyAction(s, useTransaction, PersistencyAction.PERSIST);
+			return s;
+		} catch (final PersistenceException e) {
+			throw new DaoException("Impossible de créer la saison", e);
+		}
 	}
 
 	@Override
 	public Saison readSaison(final int saisonId) throws DaoException {
-		for (final Serie serie : this.store.getSeries()) {
-			for (final Saison saison : serie.getSaisons()) {
-				if (saison.getId() == saisonId) {
-					return saison;
-				}
+		try {
+			final TypedQuery<Saison> query = this.bdd.getEm().createNamedQuery("Saison.findById", Saison.class);
+			query.setParameter("id", saisonId);
+			final List<Saison> ret = query.getResultList();
+			if (!ret.isEmpty()) {
+				return ret.get(0);
 			}
+			return null;
+		} catch (final PersistenceException e) {
+			throw new DaoException("Impossible de lire la saison " + saisonId, e);
 		}
-		return null;
 	}
 
 	@Override
 	public List<Saison> readAllSaisons() throws DaoException {
-		final List<Saison> all = new ArrayList<>();
-		for (final Serie serie : this.store.getSeries()) {
-			all.addAll(serie.getSaisons());
+		try {
+			return this.bdd.getEm().createNamedQuery("Saison.findAll", Saison.class).getResultList();
+		} catch (final PersistenceException e) {
+			throw new DaoException("Impossible de lister les saisons", e);
 		}
-		return all;
 	}
 
 	@Override
 	public List<Saison> readSaisonsBySerie(final int serieId) throws DaoException {
-		for (final Serie serie : this.store.getSeries()) {
-			if (serie.getId() == serieId) {
-				return new ArrayList<>(serie.getSaisons());
-			}
-		}
-		return Collections.emptyList();
-	}
-
-	@Override
-	public void updateSaison(final Saison s) throws DaoException {
-		// JPA merge plus tard
-	}
-
-	@Override
-	public void deleteSaison(final Saison s) throws DaoException {
-		for (final Serie serie : this.store.getSeries()) {
-			try {
-				serie.removeSaison(s);
-				return;
-			} catch (final SeriesException ignored) {
-				// saison absente de cette série
-			}
+		try {
+			final TypedQuery<Saison> query = this.bdd.getEm().createNamedQuery("Saison.findBySerie", Saison.class);
+			query.setParameter("id", serieId);
+			return query.getResultList();
+		} catch (final PersistenceException e) {
+			throw new DaoException("Impossible de lire les saisons de la série " + serieId, e);
 		}
 	}
 
-	protected DaoBddHelper getBdd() {
-		return this.bdd;
+	@Override
+	public void updateSaison(final Saison s, final boolean useTransaction) throws DaoException {
+		try {
+			this.bdd.makePersistencyAction(s, useTransaction, PersistencyAction.MERGE);
+		} catch (final PersistenceException e) {
+			throw new DaoException("Impossible de modifier la saison", e);
+		}
+	}
+
+	@Override
+	public void deleteSaison(final Saison s, final boolean useTransaction) throws DaoException {
+		try {
+			this.bdd.makePersistencyAction(s, useTransaction, PersistencyAction.REMOVE);
+		} catch (final PersistenceException e) {
+			throw new DaoException("Impossible de supprimer la saison", e);
+		}
 	}
 }
