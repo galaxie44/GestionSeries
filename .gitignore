@@ -11,6 +11,7 @@ Servers/
 target/
 *.class
 *.jar
+!WebContent/WEB-INF/lib/*.jar
 *.war
 *.ear
 

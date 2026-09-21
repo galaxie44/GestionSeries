@@ -12,11 +12,16 @@ import fr.pau.univ.series.model.Saison;
 import fr.pau.univ.series.model.Serie;
 
 /**
- * Implémentation temporaire en mémoire de {@link IEpisodeDao}.
+ * Implémentation BDD de {@link IEpisodeDao} (mémoire + helper JPA prêt).
  */
 public class EpisodeDaoBdd implements IEpisodeDao {
 
+	private final DaoBddHelper bdd;
 	private final MemoireStore store = MemoireStore.getInstance();
+
+	public EpisodeDaoBdd() throws DaoException {
+		this.bdd = DaoBddHelper.getInstance();
+	}
 
 	@Override
 	public Episode createEpisode(final Episode e) throws DaoException {
@@ -62,7 +67,7 @@ public class EpisodeDaoBdd implements IEpisodeDao {
 
 	@Override
 	public void updateEpisode(final Episode e) throws DaoException {
-		// Objet déjà en mémoire (ex. bascule vu / non vu)
+		// Objet déjà en mémoire (bascule vu / non vu)
 	}
 
 	@Override
@@ -77,5 +82,9 @@ public class EpisodeDaoBdd implements IEpisodeDao {
 				}
 			}
 		}
+	}
+
+	protected DaoBddHelper getBdd() {
+		return this.bdd;
 	}
 }

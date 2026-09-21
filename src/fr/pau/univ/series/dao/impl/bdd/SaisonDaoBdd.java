@@ -11,11 +11,16 @@ import fr.pau.univ.series.model.Saison;
 import fr.pau.univ.series.model.Serie;
 
 /**
- * Implémentation temporaire en mémoire de {@link ISaisonDao}.
+ * Implémentation BDD de {@link ISaisonDao} (mémoire + helper JPA prêt).
  */
 public class SaisonDaoBdd implements ISaisonDao {
 
+	private final DaoBddHelper bdd;
 	private final MemoireStore store = MemoireStore.getInstance();
+
+	public SaisonDaoBdd() throws DaoException {
+		this.bdd = DaoBddHelper.getInstance();
+	}
 
 	@Override
 	public Saison createSaison(final Saison s) throws DaoException {
@@ -55,7 +60,7 @@ public class SaisonDaoBdd implements ISaisonDao {
 
 	@Override
 	public void updateSaison(final Saison s) throws DaoException {
-		// Objet déjà en mémoire
+		// JPA merge plus tard
 	}
 
 	@Override
@@ -68,5 +73,9 @@ public class SaisonDaoBdd implements ISaisonDao {
 				// saison absente de cette série
 			}
 		}
+	}
+
+	protected DaoBddHelper getBdd() {
+		return this.bdd;
 	}
 }

@@ -49,8 +49,9 @@ public class DaoFactory {
 	 * Fournit le DAO des séries (lazy loading).
 	 *
 	 * @return l'implémentation {@link ISerieDao}
+	 * @throws DaoException si le DAO ne peut pas être créé
 	 */
-	public ISerieDao getSerieDao() {
+	public ISerieDao getSerieDao() throws DaoException {
 		if (this.serieDao == null) {
 			this.serieDao = new SerieDaoBdd();
 		}
@@ -61,8 +62,9 @@ public class DaoFactory {
 	 * Fournit le DAO des saisons (lazy loading).
 	 *
 	 * @return l'implémentation {@link ISaisonDao}
+	 * @throws DaoException si le DAO ne peut pas être créé
 	 */
-	public ISaisonDao getSaisonDao() {
+	public ISaisonDao getSaisonDao() throws DaoException {
 		if (this.saisonDao == null) {
 			this.saisonDao = new SaisonDaoBdd();
 		}
@@ -73,8 +75,9 @@ public class DaoFactory {
 	 * Fournit le DAO des épisodes (lazy loading).
 	 *
 	 * @return l'implémentation {@link IEpisodeDao}
+	 * @throws DaoException si le DAO ne peut pas être créé
 	 */
-	public IEpisodeDao getEpisodeDao() {
+	public IEpisodeDao getEpisodeDao() throws DaoException {
 		if (this.episodeDao == null) {
 			this.episodeDao = new EpisodeDaoBdd();
 		}

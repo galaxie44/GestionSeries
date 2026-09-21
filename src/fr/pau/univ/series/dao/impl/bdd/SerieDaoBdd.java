@@ -8,12 +8,18 @@ import fr.pau.univ.series.exception.DaoException;
 import fr.pau.univ.series.model.Serie;
 
 /**
- * Implémentation temporaire en mémoire de {@link ISerieDao}
- * (remplacée plus tard par JPA / BDD).
+ * Implémentation BDD de {@link ISerieDao}.
+ * Pour l'instant : lecture/écriture via {@link MemoireStore} ;
+ * {@link DaoBddHelper} est déjà branché pour les futures opérations JPA.
  */
 public class SerieDaoBdd implements ISerieDao {
 
+	private final DaoBddHelper bdd;
 	private final MemoireStore store = MemoireStore.getInstance();
+
+	public SerieDaoBdd() throws DaoException {
+		this.bdd = DaoBddHelper.getInstance();
+	}
 
 	@Override
 	public Serie createSerie(final Serie s) throws DaoException {
@@ -38,11 +44,16 @@ public class SerieDaoBdd implements ISerieDao {
 
 	@Override
 	public void updateSerie(final Serie s) throws DaoException {
-		// Objet déjà en mémoire : rien à faire pour l'instant
+		// Objet déjà en mémoire ; JPA merge viendra plus tard
 	}
 
 	@Override
 	public void deleteSerie(final Serie s) throws DaoException {
 		this.store.getSeries().remove(s);
+	}
+
+	/** Accès au helper JPA (transactions, EntityManager). */
+	protected DaoBddHelper getBdd() {
+		return this.bdd;
 	}
 }
