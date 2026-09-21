@@ -1,74 +1,378 @@
-/* Forms --------------------------------------------------------------------------------------- */
-table {
-	width: 100%;
+:root {
+	--bg: #eef1f4;
+	--bg-accent: #e3e9ef;
+	--surface: #ffffff;
+	--text: #18202a;
+	--muted: #5c6b7a;
+	--line: #d5dde6;
+	--teal: #0f6e6a;
+	--teal-dark: #0b5552;
+	--teal-soft: #d9efed;
+	--danger: #9b2c2c;
+	--danger-soft: #f8e4e4;
+	--ok: #1f6b3a;
+	--ok-soft: #dff3e6;
+	--pending: #8a5a12;
+	--pending-soft: #f7ecd8;
+	--shadow: 0 10px 30px rgba(24, 32, 42, 0.06);
+	--radius: 14px;
+	--font-ui: "Outfit", sans-serif;
+	--font-display: "Source Serif 4", serif;
 }
 
-form  {
-    display: inline;
-    min-width: 85px;
+* {
+	box-sizing: border-box;
 }
 
-button {
-	min-width: 75px;
-	max-width: 75px;
-	min-height : 35px;
-	max-height: 35px;
+html, body {
+	margin: 0;
+	min-height: 100%;
 }
 
-form label {
-    float: left;
-    width: 200px;
-    margin: 3px 0px 0px 0px;
+body {
+	font-family: var(--font-ui);
+	color: var(--text);
+	background:
+		radial-gradient(1200px 500px at 10% -10%, #d7ece9 0%, transparent 55%),
+		radial-gradient(900px 400px at 100% 0%, #dce4f0 0%, transparent 50%),
+		var(--bg);
 }
 
-form input {
-    margin: 3px 3px 0px 0px;
-    border: 1px #999 solid;
+.app {
+	width: min(980px, calc(100% - 2rem));
+	margin: 0 auto;
+	padding: 1.5rem 0 3rem;
 }
 
-form input.sansLabel {
-    margin-left: 200px;
+.topbar {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 1.5rem;
+	padding-bottom: 1.25rem;
+	border-bottom: 1px solid var(--line);
 }
 
-/* Styles et couleurs -------------------------------------------------------------------------- */
-
-td.filler {
-	width : 30px;
-	max-width: 30px;
-	min-width: 30px;
+.brand-mark {
+	margin: 0 0 0.25rem;
+	font-size: 0.8rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--teal);
 }
 
-td.true {
-  background-color: #F0FFF0;
+.brand h1 {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: clamp(1.8rem, 4vw, 2.4rem);
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	line-height: 1.1;
 }
 
-td.false {
-  background-color: #FFF0F0;
+.toolbar-form {
+	display: inline;
+	margin: 0;
 }
 
-
-td.Serie {
-	font-size: 3em;
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	min-width: 0;
+	min-height: 0;
+	max-width: none;
+	max-height: none;
+	padding: 0.65rem 1rem;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	background: var(--surface);
+	color: var(--text);
+	font: inherit;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
-td.Saison {
-	font-size: 2em;
+.btn img {
+	width: 18px;
+	height: 18px;
+	object-fit: contain;
 }
 
-td.Episode {
-	font-size: 16px;
+.btn:hover {
+	transform: translateY(-1px);
 }
 
-.erreur {
-	color: #FF0000;
-}
-.SerieContent {
-	margin : 5px;
-	font-size: 3em;
+.btn:focus-visible {
+	outline: 2px solid var(--teal);
+	outline-offset: 2px;
 }
 
-.SaisonContent {
-	margin : 5px;
-	padding : 5px;
-	font-size: 0.75em;
+.btn-primary {
+	background: var(--teal);
+	border-color: var(--teal);
+	color: #fff;
+}
+
+.btn-primary:hover {
+	background: var(--teal-dark);
+	border-color: var(--teal-dark);
+}
+
+.btn-icon {
+	width: 2.4rem;
+	height: 2.4rem;
+	padding: 0;
+	border-color: var(--line);
+	background: var(--surface);
+}
+
+.btn-icon:hover {
+	border-color: #b7c3d0;
+	background: var(--bg-accent);
+}
+
+.alert {
+	margin-bottom: 1rem;
+	padding: 0.85rem 1rem;
+	border-radius: 10px;
+	font-weight: 500;
+}
+
+.alert-error {
+	background: var(--danger-soft);
+	color: var(--danger);
+	border: 1px solid #efc4c4;
+}
+
+.empty-state {
+	padding: 3rem 1.5rem;
+	text-align: center;
+	background: var(--surface);
+	border: 1px dashed #c5d0db;
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+}
+
+.empty-state h2 {
+	margin: 0 0 0.5rem;
+	font-family: var(--font-display);
+	font-size: 1.6rem;
+}
+
+.empty-state p {
+	margin: 0 0 1.25rem;
+	color: var(--muted);
+}
+
+.series-list,
+.saison-list,
+.episode-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.serie-block {
+	margin-bottom: 1rem;
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+	overflow: hidden;
+}
+
+.row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.95rem 1.1rem;
+}
+
+.row-main {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.65rem 0.85rem;
+	min-width: 0;
+}
+
+.row-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	flex-shrink: 0;
+}
+
+.row-actions form {
+	display: inline;
+	margin: 0;
+}
+
+.serie-row {
+	background: linear-gradient(180deg, #f8fafb 0%, #ffffff 100%);
+	border-bottom: 1px solid var(--line);
+}
+
+.serie-title {
+	margin: 0;
+	font-family: var(--font-display);
+	font-size: 1.35rem;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.saison-list {
+	padding: 0.35rem 0.6rem 0.7rem;
+}
+
+.saison-block {
+	margin: 0.45rem 0;
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	background: #fbfcfd;
+}
+
+.saison-row {
+	padding: 0.75rem 0.85rem;
+}
+
+.saison-label {
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--teal);
+}
+
+.saison-title {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 600;
+}
+
+.episode-list {
+	border-top: 1px solid var(--line);
+}
+
+.episode-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.7rem 0.85rem;
+	border-bottom: 1px solid #e8eef3;
+}
+
+.episode-row:last-child {
+	border-bottom: none;
+}
+
+.ep-num {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2.1rem;
+	padding: 0.15rem 0.4rem;
+	border-radius: 6px;
+	background: var(--bg-accent);
+	color: var(--muted);
+	font-size: 0.75rem;
+	font-weight: 700;
+}
+
+.episode-title {
+	font-size: 0.95rem;
+	font-weight: 500;
+}
+
+.badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.2rem 0.55rem;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+}
+
+.badge-status::before {
+	content: "À voir";
+}
+
+.status-true {
+	background: linear-gradient(90deg, var(--ok-soft), transparent 42%);
+}
+
+.status-true > .row,
+.status-true.episode-row {
+	background: transparent;
+}
+
+.status-true .badge-status {
+	background: var(--ok-soft);
+	color: var(--ok);
+}
+
+.status-true .badge-status::before {
+	content: "Vu";
+}
+
+.status-false .badge-status {
+	background: var(--pending-soft);
+	color: var(--pending);
+}
+
+.status-false .badge-status::before {
+	content: "En cours";
+}
+
+.episode-row.status-false .badge-status::before {
+	content: "À voir";
+}
+
+.serie-block.status-true .serie-row .badge-status::before {
+	content: "Terminée";
+}
+
+.serie-block.status-false .serie-row .badge-status::before {
+	content: "En cours";
+}
+
+.saison-block.status-true > .saison-row .badge-status::before {
+	content: "Terminée";
+}
+
+.saison-block.status-false > .saison-row .badge-status::before {
+	content: "En cours";
+}
+
+@media (max-width: 720px) {
+	.app {
+		width: min(100% - 1.25rem, 980px);
+		padding-top: 1rem;
+	}
+
+	.topbar {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.btn-primary {
+		width: 100%;
+	}
+
+	.row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.row-actions {
+		justify-content: flex-end;
+	}
 }
