@@ -1,5 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%
+	// Si on ouvre ListeSeries.jsp directement, les données ne sont pas chargées.
+	// On redirige vers le servlet /liste.
+	if (request.getAttribute("series") == null) {
+		response.sendRedirect(request.getContextPath() + "/liste");
+		return;
+	}
+%>
 
 <!DOCTYPE html>
 <html lang="fr">
