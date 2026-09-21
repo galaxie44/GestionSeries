@@ -1,22 +1,42 @@
 package fr.pau.univ.series.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import fr.pau.univ.series.dao.DaoFactory;
 import fr.pau.univ.series.exception.SeriesException;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
+/**
+ * Entité JPA représentant une saison.
+ */
+@Entity
+@Table(name = "Saison")
 public class Saison {
 
 	private int id;
 	private int numero;
-	private final String nom;
+	private String nom;
 	private boolean toutVu = false;
-	private final List<Episode> episodes = new ArrayList<>();
+	private List<Episode> episodes = new ArrayList<>();
+
+	/** Constructeur sans paramètre obligatoire pour JPA. */
+	public Saison() {
+	}
 
 	/**
-	 * @param nom Nom de la saison.
+	 * @param nom    Nom de la saison.
+	 * @param numero Numéro de la saison.
 	 */
 	public Saison(final String nom, final int numero) {
 		this.nom = nom;
@@ -24,85 +44,67 @@ public class Saison {
 		setId(++DaoFactory.lastSaisonId);
 	}
 
-	/**
-	 * @return the id
-	 */
+	@Id
+	@Column(name = "id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	public int getId() {
 		return this.id;
 	}
 
-	/**
-	 * @param id the id to set
-	 */
 	public void setId(final int id) {
 		this.id = id;
 	}
 
-	/**
-	 * @return the numero
-	 */
+	@Column(name = "numero", nullable = false)
 	public int getNumero() {
 		return this.numero;
 	}
 
-	/**
-	 * @param numero the numero to set
-	 */
 	public void setNumero(final int numero) {
 		this.numero = numero;
 	}
 
-	/**
-	 * @return the nom
-	 */
-	public final String getNom() {
+	@Column(name = "nom", nullable = false)
+	public String getNom() {
 		return this.nom;
 	}
 
-	/**
-	 * @return the saisons
-	 */
-	public final Collection<Episode> getEpisodes() {
-		return this.episodes;
+	public void setNom(final String nom) {
+		this.nom = nom;
 	}
 
 	/**
-	 * This method adds given Episode to the list of Episodes.
-	 *
-	 * @param e The Episode to add. <b>note :</b>given Episode id is calculated
-	 *          before storing. No need to set it before calling this method.
-	 * @return the added Episode
-	 * @throws SeriesException if a Episode already exist with same id.
+	 * Relation 1-N : une saison possède plusieurs épisodes.
 	 */
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "fk_saison", referencedColumnName = "id")
+	public List<Episode> getEpisodes() {
+		return this.episodes;
+	}
+
+	public void setEpisodes(final List<Episode> episodes) {
+		this.episodes = episodes;
+	}
+
 	public Episode addEpisode(final Episode e) throws SeriesException {
 		this.episodes.add(e);
 		return e;
 	}
 
-	/**
-	 * This method removes given Episode from the list of Episodes.
-	 *
-	 * @param e the Episode to remove.
-	 * @throws SeriesException if given Episode doesn't exist in the list of
-	 *                         Episodes.
-	 */
 	public void removeEpisode(final Episode e) throws SeriesException {
-		if (this.episodes.get(e.getId()) == null) {
+		if (!this.episodes.remove(e)) {
 			throw new SeriesException("Aucun épisode trouvée avec l'identifiant ".concat(Integer.toString(e.getId())));
 		}
-		this.episodes.remove(e.getId());
 	}
 
-	/**
-	 * @param toutVu the toutVu to set
-	 */
-	public final void setToutVu(final boolean toutVu) {
+	public void setToutVu(final boolean toutVu) {
 		this.toutVu = toutVu;
 	}
 
+	@Transient
 	public boolean isToutVu() {
 		this.toutVu = true;
-		if (this.episodes.size() > 0) {
+		if (!this.episodes.isEmpty()) {
 			for (final Episode e : this.episodes) {
 				if (!e.isVu()) {
 					this.toutVu = false;
@@ -113,14 +115,6 @@ public class Saison {
 		return this.toutVu;
 	}
 
-	/**
-	 * This method return the Episode with given id.
-	 *
-	 * @param id Identifier of Episode to return
-	 * @return the Episode with given id or <code>null</code> if no Episode exists
-	 *         with given Id.
-	 * @throws SeriesException in case of error
-	 */
 	public Episode getEpisodeById(final int id) throws SeriesException {
 		for (final Episode ep : this.episodes) {
 			if (ep.getId() == id) {
@@ -147,5 +141,4 @@ public class Saison {
 		}
 		return ((Saison) obj).getId() == getId();
 	}
-
 }

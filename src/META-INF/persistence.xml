@@ -5,23 +5,26 @@
 	xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
 		https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
 
-	<!-- Nom utilisé par Persistence.createEntityManagerFactory("GestionSeries") -->
 	<persistence-unit name="GestionSeries" transaction-type="RESOURCE_LOCAL">
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 
-		<!-- Les entités seront déclarées explicitement (pages 50+) -->
+		<!-- Entités gérées par JPA (PDF p.50) -->
+		<class>fr.pau.univ.series.model.Serie</class>
+		<class>fr.pau.univ.series.model.Saison</class>
+		<class>fr.pau.univ.series.model.Episode</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 
 		<properties>
-			<!-- Connexion JDBC MySQL (WAMP) -->
 			<property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />
 			<property name="jakarta.persistence.jdbc.url"
 				value="jdbc:mysql://localhost:3306/GestionSeries?serverTimezone=UTC&amp;useSSL=false&amp;allowPublicKeyRetrieval=true" />
 			<property name="jakarta.persistence.jdbc.user" value="root" />
-			<!-- Mot de passe WAMP souvent vide ; adapter si besoin -->
 			<property name="jakarta.persistence.jdbc.password" value="" />
 
-			<!-- FINE = traces détaillées en dev ; passer à INFO en prod (PDF p.37) -->
+			<!-- Crée / étend les tables automatiquement au démarrage (équivalent Generate Tables) -->
+			<property name="eclipselink.ddl-generation" value="create-or-extend-tables" />
+			<property name="eclipselink.ddl-generation.output-mode" value="database" />
+
 			<property name="eclipselink.logging.level" value="FINE" />
 			<property name="eclipselink.logging.level.sql" value="FINE" />
 		</properties>

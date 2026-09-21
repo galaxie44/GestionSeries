@@ -1,18 +1,32 @@
 package fr.pau.univ.series.model;
 
 import fr.pau.univ.series.dao.DaoFactory;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
+/**
+ * Entité JPA représentant un épisode.
+ */
+@Entity
+@Table(name = "Episode")
 public class Episode {
 
 	private int id;
-	private final String titre;
-	private final int numero;
+	private String titre;
+	private int numero;
 	private boolean vu = false;
 
+	/** Constructeur sans paramètre obligatoire pour JPA. */
+	public Episode() {
+	}
+
 	/**
-	 * @param titre
-	 * @param numero
-	 * @param vu
+	 * @param titre  titre de l'épisode
+	 * @param numero numéro de l'épisode
 	 */
 	public Episode(final String titre, final int numero) {
 		this.titre = titre;
@@ -20,45 +34,41 @@ public class Episode {
 		setId(++DaoFactory.lastEpisodeId);
 	}
 
-	/**
-	 * @return the id
-	 */
+	@Id
+	@Column(name = "id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	public int getId() {
 		return this.id;
 	}
 
-	/**
-	 * @param id the id to set
-	 */
 	public void setId(final int id) {
 		this.id = id;
 	}
 
-	/**
-	 * @return the titre
-	 */
-	public final String getTitre() {
+	@Column(name = "titre", nullable = false)
+	public String getTitre() {
 		return this.titre;
 	}
 
-	/**
-	 * @return the numero
-	 */
-	public final int getNumero() {
+	public void setTitre(final String titre) {
+		this.titre = titre;
+	}
+
+	@Column(name = "numero", nullable = false)
+	public int getNumero() {
 		return this.numero;
 	}
 
-	/**
-	 * @return the vu
-	 */
-	public final boolean isVu() {
+	public void setNumero(final int numero) {
+		this.numero = numero;
+	}
+
+	@Column(name = "vu", nullable = false)
+	public boolean isVu() {
 		return this.vu;
 	}
 
-	/**
-	 * @param vu the vu to set
-	 */
-	public final void setVu(final boolean vu) {
+	public void setVu(final boolean vu) {
 		this.vu = vu;
 	}
 
@@ -79,5 +89,4 @@ public class Episode {
 		}
 		return ((Episode) obj).getId() == getId();
 	}
-
 }
