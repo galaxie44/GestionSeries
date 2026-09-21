@@ -108,6 +108,15 @@
 				});
 			});
 		});
+
+		document.querySelectorAll(".js-confirm-delete").forEach(function (form) {
+			form.addEventListener("submit", function (e) {
+				var message = form.getAttribute("data-message") || "Confirmer la suppression ?";
+				if (!window.confirm(message)) {
+					e.preventDefault();
+				}
+			});
+		});
 	});
 })();
 

@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./inc/style.css?v=3" />
-<script src="./inc/GestionSeries.js?v=3" defer></script>
+<link rel="stylesheet" href="./inc/style.css?v=4" />
+<script src="./inc/GestionSeries.js?v=4" defer></script>
 <title>Mes séries</title>
 </head>
 <body>
@@ -74,9 +74,13 @@
 												<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
 											</button>
 										</form>
-										<button type="button" class="icon-btn" title="Supprimer la série" aria-label="Supprimer la série">
-											<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-										</button>
+										<form method="post" action="./supprimerSerie" class="js-confirm-delete"
+											data-message="Supprimer la série « ${serie.nom} » et tout son contenu ?">
+											<input type="hidden" name="serie" value="${serie.id}" />
+											<button type="submit" class="icon-btn" title="Supprimer la série" aria-label="Supprimer la série">
+												<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+											</button>
+										</form>
 										<button type="button" class="icon-btn" id="serie-${serie.id}-bt" title="Replier"
 											onclick="masquer('serie-${serie.id}')" aria-label="Replier">
 											<svg id="serie-${serie.id}-img" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -103,9 +107,14 @@
 															<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
 														</button>
 													</form>
-													<button type="button" class="icon-btn" title="Supprimer la saison" aria-label="Supprimer la saison">
-														<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-													</button>
+													<form method="post" action="./supprimerSaison" class="js-confirm-delete"
+														data-message="Supprimer la saison ${saison.numero} et ses épisodes ?">
+														<input type="hidden" name="serie" value="${serie.id}" />
+														<input type="hidden" name="saison" value="${saison.id}" />
+														<button type="submit" class="icon-btn" title="Supprimer la saison" aria-label="Supprimer la saison">
+															<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+														</button>
+													</form>
 													<button type="button" class="icon-btn" id="serie-${serie.id}-s${saison.numero}-bt" title="Replier"
 														onclick="masquerSaison('serie-${serie.id}-s${saison.numero}')" aria-label="Replier">
 														<svg id="serie-${serie.id}-s${saison.numero}-img" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -130,9 +139,15 @@
 																	<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 8s2.5-4.5 6.5-4.5S14.5 8 14.5 8s-2.5 4.5-6.5 4.5S1.5 8 1.5 8z" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.4"/></svg>
 																</button>
 															</form>
-															<button type="button" class="icon-btn" title="Supprimer l'épisode" aria-label="Supprimer l'épisode">
-																<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-															</button>
+															<form method="post" action="./supprimerEpisode" class="js-confirm-delete"
+																data-message="Supprimer l'épisode « ${episode.titre} » ?">
+																<input type="hidden" name="serie" value="${serie.id}" />
+																<input type="hidden" name="saison" value="${saison.id}" />
+																<input type="hidden" name="episode" value="${episode.id}" />
+																<button type="submit" class="icon-btn" title="Supprimer l'épisode" aria-label="Supprimer l'épisode">
+																	<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+																</button>
+															</form>
 														</div>
 													</li>
 												</c:forEach>
