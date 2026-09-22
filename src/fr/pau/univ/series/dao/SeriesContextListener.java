@@ -1,7 +1,5 @@
 package fr.pau.univ.series.dao;
 
-import fr.pau.univ.series.dao.impl.bdd.DataSeeder;
-import fr.pau.univ.series.dao.impl.bdd.DaoBddHelper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -10,23 +8,30 @@ import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 
 /**
- * Initialise l'EntityManager JPA au démarrage de Tomcat (PDF p.39–40).
+ * Initialise l'EntityManagerFactory au démarrage.
+ * Les EntityManager sont créés par requête (voir {@link EntityManagerFilter}).
  */
 @WebListener
 public class SeriesContextListener implements ServletContextListener {
 
-	private static EntityManager em;
 	private static EntityManagerFactory emf;
+	private static final ThreadLocal<EntityManager> CURRENT_EM = new ThreadLocal<>();
 
 	@Override
 	public void contextInitialized(final ServletContextEvent sce) {
 		try {
 			emf = Persistence.createEntityManagerFactory("GestionSeries");
-			em = emf.createEntityManager();
-			System.out.println("[GestionSeries] EntityManager JPA initialisé.");
-			// Force l'init du helper puis seed si besoin
-			DaoBddHelper.getInstance();
-			DataSeeder.seedIfEmpty();
+			System.out.println("[GestionSeries] EntityManagerFactory JPA initialisé.");
+			final EntityManager bootstrapEm = emf.createEntityManager();
+			try {
+				bind(bootstrapEm);
+				fr.pau.univ.series.dao.impl.bdd.DataSeeder.seedIfEmpty();
+			} finally {
+				clear();
+				if (bootstrapEm.isOpen()) {
+					bootstrapEm.close();
+				}
+			}
 		} catch (final Exception e) {
 			System.err.println("[GestionSeries] Impossible d'initialiser JPA : " + e.getMessage());
 			e.printStackTrace();
@@ -35,16 +40,31 @@ public class SeriesContextListener implements ServletContextListener {
 
 	@Override
 	public void contextDestroyed(final ServletContextEvent sce) {
-		if (em != null && em.isOpen()) {
-			em.close();
-		}
+		clear();
 		if (emf != null && emf.isOpen()) {
 			emf.close();
 		}
-		System.out.println("[GestionSeries] EntityManager JPA fermé.");
+		System.out.println("[GestionSeries] EntityManagerFactory JPA fermé.");
 	}
 
+	public static EntityManagerFactory getEntityManagerFactory() {
+		return emf;
+	}
+
+	@Deprecated
 	public static EntityManager getEntityManager() {
-		return em;
+		return getCurrentEntityManager();
+	}
+
+	public static EntityManager getCurrentEntityManager() {
+		return CURRENT_EM.get();
+	}
+
+	public static void bind(final EntityManager em) {
+		CURRENT_EM.set(em);
+	}
+
+	public static void clear() {
+		CURRENT_EM.remove();
 	}
 }

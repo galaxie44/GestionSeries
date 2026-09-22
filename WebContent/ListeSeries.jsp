@@ -17,8 +17,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./inc/style.css?v=4" />
-<script src="./inc/GestionSeries.js?v=4" defer></script>
+<link rel="stylesheet" href="./inc/style.css?v=6" />
+<script src="./inc/GestionSeries.js?v=6" defer></script>
 <title>Mes séries</title>
 </head>
 <body>
@@ -41,8 +41,26 @@
 			<p class="subtitle">Suivi simple de tes saisons et épisodes.</p>
 		</section>
 
+		<form class="toolbar" method="get" action="./liste">
+			<label class="search-field">
+				<span class="visually-hidden">Rechercher</span>
+				<input type="search" name="q" value="<c:out value='${q}' />" placeholder="Rechercher une série…" />
+			</label>
+			<label class="check-field">
+				<input type="checkbox" name="aVoir" value="1" <c:if test="${aVoir}">checked</c:if> />
+				<span>À voir seulement</span>
+			</label>
+			<button type="submit" class="btn btn-ghost">Filtrer</button>
+			<c:if test="${not empty q or aVoir}">
+				<a class="btn btn-ghost" href="./liste">Réinitialiser</a>
+			</c:if>
+		</form>
+
 		<c:if test="${not empty erreur}">
 			<div class="toast toast-error" role="alert"><c:out value="${erreur}" /></div>
+		</c:if>
+		<c:if test="${not empty succes}">
+			<div class="toast toast-success" role="status"><c:out value="${succes}" /></div>
 		</c:if>
 
 		<main>
@@ -61,19 +79,34 @@
 								<circle cx="16.5" cy="13" r="1.2" fill="currentColor"/>
 							</svg>
 						</div>
-						<h2>Aucune série</h2>
-						<p>Commence par ajouter une série à ta liste.</p>
-						<button type="button" class="btn btn-blue" id="btnNewSerieEmpty">Ajouter une série</button>
+						<c:choose>
+							<c:when test="${not empty q or aVoir}">
+								<h2>Aucun résultat</h2>
+								<p>Aucun résultat pour ces filtres.</p>
+								<a class="btn btn-blue" href="./liste">Voir toutes les séries</a>
+							</c:when>
+							<c:otherwise>
+								<h2>Aucune série</h2>
+								<p>Commence par ajouter une série à ta liste.</p>
+								<button type="button" class="btn btn-blue" id="btnNewSerieEmpty">Ajouter une série</button>
+							</c:otherwise>
+						</c:choose>
 					</section>
 				</c:when>
 				<c:otherwise>
 					<div class="stack">
 						<c:forEach var="serie" items="${series}">
-							<article class="panel status-${serie.toutVu}">
+							<article class="panel status-${serie.toutVu}" id="serie-${serie.id}">
 								<header class="panel-head">
 									<div class="panel-titles">
 										<span class="pill"></span>
 										<h2><c:out value="${serie.nom}" /></h2>
+										<div class="progress" title="${serie.nbEpisodesVus} / ${serie.nbEpisodes} épisodes">
+											<div class="progress-track">
+												<span class="progress-bar" style="width: ${serie.progression}%"></span>
+											</div>
+											<span class="progress-label">${serie.progression}%</span>
+										</div>
 									</div>
 									<div class="actions">
 										<form method="post" action="./creerSaison">
@@ -98,7 +131,7 @@
 
 								<div class="panel-body">
 									<c:forEach var="saison" items="${serie.saisons}">
-										<section class="season status-${saison.toutVu} serie-${serie.id}-saison">
+										<section class="season status-${saison.toutVu} serie-${serie.id}-saison" id="saison-${saison.id}">
 											<header class="season-head">
 												<div class="panel-titles">
 													<p class="kicker">Saison <c:out value="${saison.numero}" /></p>
@@ -123,6 +156,12 @@
 															<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
 														</button>
 													</form>
+													<form method="post" action="./marquerSaisonVue" title="Marquer toute la saison comme vue">
+														<input type="hidden" name="saison" value="${saison.id}" />
+														<button type="submit" class="icon-btn" title="Tout marquer vu" aria-label="Tout marquer vu">
+															<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+														</button>
+													</form>
 													<button type="button" class="icon-btn" id="serie-${serie.id}-s${saison.numero}-bt" title="Replier"
 														onclick="masquerSaison('serie-${serie.id}-s${saison.numero}')" aria-label="Replier">
 														<svg id="serie-${serie.id}-s${saison.numero}-img" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 10l4-4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -132,7 +171,7 @@
 
 											<ul class="episodes">
 												<c:forEach var="episode" items="${saison.episodes}">
-													<li class="episode status-${episode.vu} serie-${serie.id}-saison serie-${serie.id}-s${saison.numero}-ep">
+													<li class="episode status-${episode.vu} serie-${serie.id}-saison serie-${serie.id}-s${saison.numero}-ep" id="ep-${episode.id}">
 														<div class="episode-main">
 															<span class="ep-index"><c:out value="${episode.numero}" /></span>
 															<span class="ep-title"><c:out value="${episode.titre}" /></span>

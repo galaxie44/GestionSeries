@@ -21,8 +21,12 @@ import jakarta.persistence.Transient;
 @Entity
 @Table(name = "Serie")
 @NamedQueries({
-		@NamedQuery(name = "Serie.findAll", query = "SELECT s FROM Serie s"),
-		@NamedQuery(name = "Serie.findById", query = "SELECT s FROM Serie s WHERE s.id = :id")
+		@NamedQuery(name = "Serie.findAll",
+				query = "SELECT DISTINCT s FROM Serie s LEFT JOIN FETCH s.saisons sa LEFT JOIN FETCH sa.episodes"),
+		@NamedQuery(name = "Serie.findById",
+				query = "SELECT DISTINCT s FROM Serie s LEFT JOIN FETCH s.saisons sa LEFT JOIN FETCH sa.episodes WHERE s.id = :id"),
+		@NamedQuery(name = "Serie.searchByNom",
+				query = "SELECT DISTINCT s FROM Serie s LEFT JOIN FETCH s.saisons sa LEFT JOIN FETCH sa.episodes WHERE LOWER(s.nom) LIKE LOWER(CONCAT('%', :q, '%'))")
 })
 public class Serie {
 
@@ -58,7 +62,7 @@ public class Serie {
 		this.nom = nom;
 	}
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "fk_serie", referencedColumnName = "id")
 	public List<Saison> getSaisons() {
 		return this.saisons;
@@ -95,6 +99,38 @@ public class Serie {
 			}
 		}
 		return this.toutVu;
+	}
+
+	@Transient
+	public int getNbEpisodes() {
+		int total = 0;
+		for (final Saison s : this.saisons) {
+			total += s.getEpisodes().size();
+		}
+		return total;
+	}
+
+	@Transient
+	public int getNbEpisodesVus() {
+		int vus = 0;
+		for (final Saison s : this.saisons) {
+			for (final Episode e : s.getEpisodes()) {
+				if (e.isVu()) {
+					vus++;
+				}
+			}
+		}
+		return vus;
+	}
+
+	/** Progression 0–100. */
+	@Transient
+	public int getProgression() {
+		final int total = getNbEpisodes();
+		if (total == 0) {
+			return 0;
+		}
+		return (100 * getNbEpisodesVus()) / total;
 	}
 
 	public Saison getSaisonById(final int id) throws SeriesException {

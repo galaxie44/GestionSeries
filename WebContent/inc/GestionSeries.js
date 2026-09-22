@@ -46,7 +46,30 @@
 		onConfirm(value);
 	}
 
+	function saveScroll() {
+		sessionStorage.setItem("gs-scroll", String(window.scrollY || window.pageYOffset || 0));
+	}
+
 	ready(function () {
+		// Après un POST (vu, suppressions…), garder la position dans la page.
+		var savedScroll = sessionStorage.getItem("gs-scroll");
+		if (savedScroll !== null) {
+			sessionStorage.removeItem("gs-scroll");
+			var y = parseInt(savedScroll, 10);
+			if (!isNaN(y)) {
+				window.scrollTo(0, y);
+				requestAnimationFrame(function () {
+					window.scrollTo(0, y);
+				});
+			}
+		}
+
+		document.querySelectorAll('form[method="post"]').forEach(function (form) {
+			form.addEventListener("submit", function () {
+				saveScroll();
+			});
+		});
+
 		modal = document.getElementById("nameModal");
 		input = document.getElementById("modalInput");
 		titleEl = document.getElementById("modalTitle");
@@ -78,6 +101,7 @@
 				placeholder: "Ex. The Good Place",
 				onConfirm: function (value) {
 					document.getElementById("nomNvlleSerie").value = value;
+					saveScroll();
 					document.getElementById("newSerieForm").submit();
 				}
 			});
@@ -103,6 +127,7 @@
 					placeholder: "Titre de l'épisode",
 					onConfirm: function (value) {
 						document.getElementById(serie + saison).value = value;
+						saveScroll();
 						form.submit();
 					}
 				});

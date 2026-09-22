@@ -25,3 +25,7 @@ CREATE TABLE IF NOT EXISTS Episode (
   PRIMARY KEY (id),
   CONSTRAINT FK_Episode_fk_saison FOREIGN KEY (fk_saison) REFERENCES Saison (id)
 );
+
+CREATE INDEX IF NOT EXISTS idx_saison_fk_serie ON Saison (fk_serie);
+CREATE INDEX IF NOT EXISTS idx_episode_fk_saison ON Episode (fk_saison);
+CREATE INDEX IF NOT EXISTS idx_serie_nom ON Serie (nom);

@@ -43,9 +43,30 @@ public class SerieDaoBdd implements ISerieDao {
 
 	@Override
 	public List<Serie> readAllSeries() throws DaoException {
+		return findSeries(null, false);
+	}
+
+	@Override
+	public List<Serie> findSeries(final String q, final boolean onlyAVoir) throws DaoException {
 		try {
-			final TypedQuery<Serie> query = this.bdd.getEm().createNamedQuery("Serie.findAll", Serie.class);
-			return query.getResultList();
+			final List<Serie> result;
+			if (q != null && !q.isBlank()) {
+				final TypedQuery<Serie> query = this.bdd.getEm().createNamedQuery("Serie.searchByNom", Serie.class);
+				query.setParameter("q", q.trim());
+				result = query.getResultList();
+			} else {
+				result = this.bdd.getEm().createNamedQuery("Serie.findAll", Serie.class).getResultList();
+			}
+			if (!onlyAVoir) {
+				return result;
+			}
+			final List<Serie> filtered = new java.util.ArrayList<>();
+			for (final Serie s : result) {
+				if (!s.isToutVu()) {
+					filtered.add(s);
+				}
+			}
+			return filtered;
 		} catch (final PersistenceException e) {
 			throw new DaoException("Impossible de lister les séries", e);
 		}

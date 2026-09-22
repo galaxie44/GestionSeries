@@ -22,17 +22,14 @@ public class CreerSerie extends HttpServlet {
 		if (nom != null && !nom.isBlank()) {
 			try {
 				DaoFactory.getInstance().getSerieDao().createSerie(new Serie(nom.trim()), true);
+				ServletUtils.setFlashSuccess(request, "Série créée.");
 			} catch (final DaoException e) {
-				request.setAttribute("erreur", e.getMessage());
+				ServletUtils.setFlashError(request, e.getMessage());
 				e.printStackTrace();
 			}
+		} else {
+			ServletUtils.setFlashError(request, "Le nom de la série est obligatoire.");
 		}
-		redirectListe(request, response);
-	}
-
-	private void redirectListe(final HttpServletRequest request, final HttpServletResponse response)
-			throws IOException {
-		response.sendRedirect("http://".concat(request.getServerName()).concat(":")
-				.concat(Integer.toString(request.getServerPort())).concat(request.getContextPath()).concat("/liste"));
+		ServletUtils.redirectListe(request, response);
 	}
 }

@@ -7,83 +7,72 @@ import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.PersistenceException;
 
 /**
- * Singleton d'accès à l'EntityManager JPA (PDF p.41–42, 60, 68).
+ * Accès à l'EntityManager du thread courant (un EM par requête HTTP).
  */
 public class DaoBddHelper {
 
-	private static DaoBddHelper instance;
-	private final EntityManager em;
+	private static final DaoBddHelper INSTANCE = new DaoBddHelper();
 
-	private DaoBddHelper() throws DaoException {
-		try {
-			this.em = SeriesContextListener.getEntityManager();
-			if (this.em != null) {
-				System.out.println("EntityManager créé.");
-			} else {
-				throw new DaoException(
-						"EntityManager null : vérifier MySQL (WAMP), persistence.xml et les jars WEB-INF/lib.");
-			}
-		} catch (final DaoException e) {
-			throw e;
-		} catch (final Exception e) {
-			throw new DaoException("Impossible de créer l'EntityManager.", e);
-		}
+	private DaoBddHelper() {
 	}
 
-	public static synchronized DaoBddHelper getInstance() throws DaoException {
-		if (instance == null) {
-			instance = new DaoBddHelper();
+	public static DaoBddHelper getInstance() throws DaoException {
+		if (SeriesContextListener.getCurrentEntityManager() == null) {
+			throw new DaoException(
+					"Aucun EntityManager lié au thread : vérifier EntityManagerFilter / démarrage JPA.");
 		}
-		return instance;
+		return INSTANCE;
 	}
 
 	public EntityManager getEm() {
-		return this.em;
+		return SeriesContextListener.getCurrentEntityManager();
 	}
 
 	public void beginTransaction() {
-		final EntityTransaction trans = this.em.getTransaction();
+		final EntityTransaction trans = getEm().getTransaction();
 		if (!trans.isActive()) {
 			trans.begin();
 		}
 	}
 
 	public void commitTransaction() {
-		final EntityTransaction trans = this.em.getTransaction();
+		final EntityTransaction trans = getEm().getTransaction();
 		if (trans.isActive()) {
 			trans.commit();
 		}
 	}
 
 	public void rollbackTransaction() {
-		final EntityTransaction trans = this.em.getTransaction();
+		final EntityManager em = getEm();
+		if (em == null) {
+			return;
+		}
+		final EntityTransaction trans = em.getTransaction();
 		if (trans.isActive()) {
 			trans.rollback();
 		}
 	}
 
-	/**
-	 * Factorise persist / merge / remove avec gestion optionnelle de transaction.
-	 */
 	public void makePersistencyAction(final Object obj, final boolean useTrans, final PersistencyAction action)
 			throws PersistenceException {
+		final EntityManager em = getEm();
 		try {
 			if (useTrans) {
 				beginTransaction();
 			}
 			switch (action) {
 			case PERSIST:
-				this.em.persist(obj);
+				em.persist(obj);
 				break;
 			case MERGE:
-				this.em.merge(obj);
+				em.merge(obj);
 				break;
 			case REMOVE:
 				Object managed = obj;
-				if (!this.em.contains(obj)) {
-					managed = this.em.merge(obj);
+				if (!em.contains(obj)) {
+					managed = em.merge(obj);
 				}
-				this.em.remove(managed);
+				em.remove(managed);
 				break;
 			default:
 				break;

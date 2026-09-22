@@ -21,7 +21,8 @@ import jakarta.persistence.Transient;
 @Entity
 @Table(name = "Saison")
 @NamedQueries({
-		@NamedQuery(name = "Saison.findById", query = "SELECT s FROM Saison s WHERE s.id = :id"),
+		@NamedQuery(name = "Saison.findById",
+				query = "SELECT DISTINCT s FROM Saison s LEFT JOIN FETCH s.episodes WHERE s.id = :id"),
 		@NamedQuery(name = "Saison.findAll", query = "SELECT s FROM Saison s"),
 		@NamedQuery(name = "Saison.findByEpisode",
 				query = "SELECT s FROM Saison s JOIN s.episodes e WHERE e.id = :id"),
@@ -73,7 +74,7 @@ public class Saison {
 		this.nom = nom;
 	}
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "fk_saison", referencedColumnName = "id")
 	public List<Episode> getEpisodes() {
 		return this.episodes;

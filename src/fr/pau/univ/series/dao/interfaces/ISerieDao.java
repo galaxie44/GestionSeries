@@ -21,6 +21,14 @@ public interface ISerieDao {
 
 	List<Serie> readAllSeries() throws DaoException;
 
+	/**
+	 * Liste / recherche les séries, optionnellement filtrées sur celles non terminées.
+	 *
+	 * @param q         fragment de nom (nullable / blank = toutes)
+	 * @param onlyAVoir si {@code true}, ne garde que les séries avec au moins un épisode à voir
+	 */
+	List<Serie> findSeries(String q, boolean onlyAVoir) throws DaoException;
+
 	void updateSerie(Serie s, boolean useTransaction) throws DaoException;
 
 	void deleteSerie(Serie s, boolean useTransaction) throws DaoException;
