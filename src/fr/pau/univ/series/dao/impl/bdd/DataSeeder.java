@@ -5,9 +5,12 @@ import fr.pau.univ.series.exception.SeriesException;
 import fr.pau.univ.series.model.Episode;
 import fr.pau.univ.series.model.Saison;
 import fr.pau.univ.series.model.Serie;
+import fr.pau.univ.series.model.User;
+import fr.pau.univ.series.model.UserRole;
+import fr.pau.univ.series.util.PasswordHelper;
 
 /**
- * Insère les données de démo en BDD si la table Serie est vide.
+ * Insère les données de démo en BDD si nécessaire.
  */
 public final class DataSeeder {
 
@@ -15,6 +18,33 @@ public final class DataSeeder {
 	}
 
 	public static void seedIfEmpty() throws DaoException, SeriesException {
+		seedSeriesIfEmpty();
+		seedUsersIfEmpty();
+	}
+
+	private static void seedUsersIfEmpty() throws DaoException {
+		final DaoBddHelper bdd = DaoBddHelper.getInstance();
+		final long count = bdd.getEm().createQuery("SELECT COUNT(u) FROM User u", Long.class).getSingleResult();
+		if (count > 0) {
+			System.out.println("[GestionSeries] Utilisateurs déjà présents (" + count + ").");
+			return;
+		}
+		System.out.println("[GestionSeries] Insertion des utilisateurs API (admin/admin, user/user)...");
+		bdd.beginTransaction();
+		try {
+			final User admin = new User("admin", PasswordHelper.generateSecurePassword("admin"), UserRole.ROLE_ADMIN);
+			final User user = new User("user", PasswordHelper.generateSecurePassword("user"), UserRole.ROLE_USER);
+			bdd.getEm().persist(admin);
+			bdd.getEm().persist(user);
+			bdd.commitTransaction();
+			System.out.println("[GestionSeries] Utilisateurs API insérés.");
+		} catch (final Exception e) {
+			bdd.rollbackTransaction();
+			throw e;
+		}
+	}
+
+	private static void seedSeriesIfEmpty() throws DaoException, SeriesException {
 		final DaoBddHelper bdd = DaoBddHelper.getInstance();
 		final long count = bdd.getEm().createQuery("SELECT COUNT(s) FROM Serie s", Long.class).getSingleResult();
 		if (count > 0) {

@@ -12,6 +12,7 @@
 		<class>fr.pau.univ.series.model.Serie</class>
 		<class>fr.pau.univ.series.model.Saison</class>
 		<class>fr.pau.univ.series.model.Episode</class>
+		<class>fr.pau.univ.series.model.User</class>
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 
 		<properties>

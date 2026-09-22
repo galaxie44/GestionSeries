@@ -3,9 +3,11 @@ package fr.pau.univ.series.dao;
 import fr.pau.univ.series.dao.impl.bdd.EpisodeDaoBdd;
 import fr.pau.univ.series.dao.impl.bdd.SaisonDaoBdd;
 import fr.pau.univ.series.dao.impl.bdd.SerieDaoBdd;
+import fr.pau.univ.series.dao.impl.bdd.UserDaoBdd;
 import fr.pau.univ.series.dao.interfaces.IEpisodeDao;
 import fr.pau.univ.series.dao.interfaces.ISaisonDao;
 import fr.pau.univ.series.dao.interfaces.ISerieDao;
+import fr.pau.univ.series.dao.interfaces.IUserDao;
 import fr.pau.univ.series.exception.DaoException;
 
 /**
@@ -18,6 +20,7 @@ public class DaoFactory {
 	private ISerieDao serieDao = null;
 	private ISaisonDao saisonDao = null;
 	private IEpisodeDao episodeDao = null;
+	private IUserDao userDao = null;
 
 	public static final DaoFactory getInstance() throws DaoException {
 		if (instance == null) {
@@ -48,5 +51,12 @@ public class DaoFactory {
 			this.episodeDao = new EpisodeDaoBdd();
 		}
 		return this.episodeDao;
+	}
+
+	public IUserDao getUserDao() throws DaoException {
+		if (this.userDao == null) {
+			this.userDao = new UserDaoBdd();
+		}
+		return this.userDao;
 	}
 }
