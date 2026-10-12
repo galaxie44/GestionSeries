@@ -24,3 +24,5 @@ Thumbs.db
 docs/node_modules/
 docs/package.json
 docs/package-lock.json
+
+docs/_moodle/
