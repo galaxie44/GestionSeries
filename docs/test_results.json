@@ -17,7 +17,7 @@
     {
         "Test":  "Serie appears in GET all",
         "OK":  true,
-        "Detail":  "name=TestAPI_131358"
+        "Detail":  "name=TestAPI_153526"
     },
     {
         "Test":  "POST login user",
@@ -32,7 +32,7 @@
     {
         "Test":  "GET /liste UI",
         "OK":  true,
-        "Detail":  "status=200 len=84970"
+        "Detail":  "status=200 len=93955"
     },
     {
         "Test":  "login bad password expect 400",
