@@ -24,10 +24,15 @@ public final class DataSeeder {
 
 	private static void seedUsersIfEmpty() throws DaoException {
 		final DaoBddHelper bdd = DaoBddHelper.getInstance();
-		final long count = bdd.getEm().createQuery("SELECT COUNT(u) FROM User u", Long.class).getSingleResult();
-		if (count > 0) {
-			System.out.println("[GestionSeries] Utilisateurs déjà présents (" + count + ").");
-			return;
+		try {
+			final long count = bdd.getEm().createQuery("SELECT COUNT(u) FROM User u", Long.class).getSingleResult();
+			if (count > 0) {
+				System.out.println("[GestionSeries] Utilisateurs déjà présents (" + count + ").");
+				return;
+			}
+		} catch (final Exception e) {
+			System.err.println("[GestionSeries] Table AppUser absente ou inaccessible, tentative de seed : "
+					+ e.getMessage());
 		}
 		System.out.println("[GestionSeries] Insertion des utilisateurs API (admin/admin, user/user)...");
 		bdd.beginTransaction();
@@ -40,7 +45,8 @@ public final class DataSeeder {
 			System.out.println("[GestionSeries] Utilisateurs API insérés.");
 		} catch (final Exception e) {
 			bdd.rollbackTransaction();
-			throw e;
+			System.err.println("[GestionSeries] Impossible de seed les utilisateurs : " + e.getMessage());
+			// Ne bloque pas le démarrage de l'appli (UI / séries restent OK)
 		}
 	}
 

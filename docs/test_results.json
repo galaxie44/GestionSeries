@@ -1,0 +1,42 @@
+﻿[
+    {
+        "Test":  "GET /api/serie/all",
+        "OK":  true,
+        "Detail":  "status=200"
+    },
+    {
+        "Test":  "POST login admin",
+        "OK":  true,
+        "Detail":  "tokenLen=216"
+    },
+    {
+        "Test":  "POST serie/add admin",
+        "OK":  true,
+        "Detail":  "status=201"
+    },
+    {
+        "Test":  "Serie appears in GET all",
+        "OK":  true,
+        "Detail":  "name=TestAPI_131358"
+    },
+    {
+        "Test":  "POST login user",
+        "OK":  true,
+        "Detail":  "tokenLen=213"
+    },
+    {
+        "Test":  "POST add as user expect 403",
+        "OK":  true,
+        "Detail":  "status=403"
+    },
+    {
+        "Test":  "GET /liste UI",
+        "OK":  true,
+        "Detail":  "status=200 len=84970"
+    },
+    {
+        "Test":  "login bad password expect 400",
+        "OK":  true,
+        "Detail":  "status=400"
+    }
+]

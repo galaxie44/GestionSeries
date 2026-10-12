@@ -45,7 +45,7 @@ public class User {
 		this.id = id;
 	}
 
-	@Column(name = "login", nullable = false, unique = true)
+	@Column(name = "login", nullable = false, unique = true, length = 100)
 	public String getLogin() {
 		return this.login;
 	}
@@ -54,7 +54,7 @@ public class User {
 		this.login = login;
 	}
 
-	@Column(name = "password", nullable = false)
+	@Column(name = "password", nullable = false, length = 255)
 	@JsonIgnore
 	public String getPassword() {
 		return this.password;
@@ -65,7 +65,7 @@ public class User {
 	}
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "role", nullable = false)
+	@Column(name = "role", nullable = false, length = 32)
 	public UserRole getRole() {
 		return this.role;
 	}
